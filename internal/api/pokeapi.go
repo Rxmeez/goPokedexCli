@@ -6,6 +6,9 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"time"
+
+	"github.com/rxmeez/goPokedexCli/internal/pokecache"
 )
 
 type Config struct {
@@ -24,10 +27,29 @@ type PokeLocationArea struct {
 	} `json:"results"`
 }
 
-func (p *PokeLocationArea) printLocationNames() {
+func (p *PokeLocationArea) printLocationNames(body []byte) error {
+	err := json.Unmarshal(body, p)
+	if err != nil {
+		return err
+	}
 	for _, res := range p.Results {
 		fmt.Println(res.Name)
 	}
+	return nil
+}
+
+func (p *PokeLocationArea) updateUrlState(c *Config) {
+	if p.Next != nil {
+		c.Next = *p.Next
+	} else {
+		c.Next = ""
+	}
+	if p.Previous != nil {
+		c.Previous = *p.Previous
+	} else {
+		c.Previous = ""
+	}
+
 }
 
 func selectURL(c *Config, direction string) string {
@@ -44,41 +66,41 @@ func selectURL(c *Config, direction string) string {
 	return c.Url
 }
 
-func GetPokeLocationArea(c *Config, direction string) error {
-	res, err := http.Get(selectURL(c, direction))
+var pokeCache = pokecache.NewCache(5 * time.Second)
 
+func GetPokeLocationArea(c *Config, direction string) error {
+	url := selectURL(c, direction)
+	pokeLocationArea := PokeLocationArea{}
+
+	if v, ok := pokeCache.Get(url); ok {
+
+		err := pokeLocationArea.printLocationNames(v)
+		if err != nil {
+			return err
+		}
+		pokeLocationArea.updateUrlState(c)
+
+	}
+
+	res, err := http.Get(selectURL(c, direction))
 	if err != nil {
 		return err
 	}
+
 	body, err := io.ReadAll(res.Body)
 	res.Body.Close()
 	if res.StatusCode > 299 {
 		log.Fatalf("Response failed with status code: %d and \nbody: %s\n", res.StatusCode, body)
 	}
-
 	if err != nil {
 		return err
 	}
 
-	pokeLocationArea := PokeLocationArea{}
-
-	err = json.Unmarshal(body, &pokeLocationArea)
+	err = pokeLocationArea.printLocationNames(body)
 	if err != nil {
 		return err
 	}
-
-	if pokeLocationArea.Next != nil {
-		c.Next = *pokeLocationArea.Next
-	} else {
-		c.Next = ""
-	}
-	if pokeLocationArea.Previous != nil {
-		c.Previous = *pokeLocationArea.Previous
-	} else {
-		c.Previous = ""
-	}
-
-	pokeLocationArea.printLocationNames()
+	pokeLocationArea.updateUrlState(c)
 	return nil
 
 }
