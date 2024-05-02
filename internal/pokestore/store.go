@@ -1,5 +1,7 @@
 package pokestore
 
+import "fmt"
+
 type Pokemon struct {
 	Abilities []struct {
 		Ability struct {
@@ -285,4 +287,30 @@ func NewPokeStore() PokeStore {
 
 func (s *PokeStore) Add(name string, details Pokemon) {
 	s.pokemon[name] = details
+}
+
+func (s *PokeStore) Inspect(name string) error {
+	pokemon, ok := s.pokemon[name]
+	if !ok {
+		fmt.Println("You have not caught that pokemon")
+		return nil
+	}
+	fmt.Printf("Name: %v\n", pokemon.Name)
+	fmt.Printf("Height: %v\n", pokemon.Height)
+	fmt.Printf("Weight: %v\n", pokemon.Weight)
+
+	if len(pokemon.Stats) > 0 {
+		fmt.Println("Stats:")
+		for _, s := range pokemon.Stats {
+			fmt.Printf("- %s: %v\n", s.Stat.Name, s.BaseStat)
+		}
+	}
+	if len(pokemon.Types) > 0 {
+		fmt.Println("Types:")
+		for _, t := range pokemon.Types {
+			fmt.Printf("- %s\n", t.Type.Name)
+		}
+	}
+
+	return nil
 }

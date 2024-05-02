@@ -26,7 +26,7 @@ func StartRepl() {
 		}
 
 		switch command.name {
-		case "explore", "catch":
+		case "explore", "catch", "inspect":
 			if len(words) < 2 {
 				fmt.Printf("%s command requires an additional argument\n", command.name)
 				continue
@@ -87,6 +87,11 @@ func getCommands() map[string]cliCommand {
 			name:        "catch",
 			description: "Catches a pokemon",
 			callback:    commandCatch,
+		},
+		"inspect": {
+			name:        "inspect",
+			description: "Inspect a captured pokemon",
+			callback:    commandInspect,
 		},
 	}
 }

@@ -297,12 +297,12 @@ func (p *Pokemon) catch(body []byte, pokemon string) error {
 		fmt.Printf("Oh no! %s escaped!\n", pokemon)
 	} else {
 		fmt.Printf("Congratulations! You caught %s!\n", pokemon)
-		pokeStore.Add(pokemon, pokestore.Pokemon(pokemonDetails))
+		PokeStore.Add(pokemon, pokestore.Pokemon(pokemonDetails))
 	}
 	return nil
 }
 
-var pokeStore = pokestore.NewPokeStore()
+var PokeStore = pokestore.NewPokeStore()
 
 func CatchPokemon(pokemon string) error {
 	url := BaseUrl + "pokemon/" + pokemon
