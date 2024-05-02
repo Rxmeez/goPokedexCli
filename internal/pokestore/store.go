@@ -314,3 +314,10 @@ func (s *PokeStore) Inspect(name string) error {
 
 	return nil
 }
+
+func (s *PokeStore) List() {
+	fmt.Println("Your Pokedex:")
+	for k := range s.pokemon {
+		fmt.Printf("- %s\n", k)
+	}
+}
