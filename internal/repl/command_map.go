@@ -5,7 +5,7 @@ import (
 )
 
 var pokeConfig = &api.Config{
-	Url:      "https://pokeapi.co/api/v2/location-area/",
+	Url:      api.BaseUrl + "location-area/",
 	Next:     "",
 	Previous: "",
 }

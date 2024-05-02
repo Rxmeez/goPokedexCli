@@ -24,9 +24,22 @@ func StartRepl() {
 			fmt.Printf("Unknown command: %s\n", commandName)
 			continue
 		}
-		err := command.callback()
-		if err != nil {
-			fmt.Println(err)
+
+		if command.name == "explore" {
+			if len(words) < 2 {
+				fmt.Println("explore command requires a location argument")
+				continue
+			}
+			err := command.callback.(func(string) error)(words[1])
+			if err != nil {
+				fmt.Println(err)
+			}
+
+		} else {
+			err := command.callback.(func() error)()
+			if err != nil {
+				fmt.Println(err)
+			}
 		}
 	}
 }
@@ -40,7 +53,7 @@ func cleanInput(text string) []string {
 type cliCommand struct {
 	name        string
 	description string
-	callback    func() error
+	callback    interface{}
 }
 
 func getCommands() map[string]cliCommand {
@@ -64,6 +77,11 @@ func getCommands() map[string]cliCommand {
 			name:        "mapb",
 			description: "Similar to the map command, however it displays the previous 20 locations. It's a way to go back",
 			callback:    commandMapb,
+		},
+		"explore": {
+			name:        "explore",
+			description: "Displays pokemon in a given area",
+			callback:    commandExplore,
 		},
 	}
 }
