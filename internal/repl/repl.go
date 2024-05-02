@@ -25,17 +25,17 @@ func StartRepl() {
 			continue
 		}
 
-		if command.name == "explore" {
+		switch command.name {
+		case "explore", "catch":
 			if len(words) < 2 {
-				fmt.Println("explore command requires a location argument")
+				fmt.Printf("%s command requires an additional argument\n", command.name)
 				continue
 			}
 			err := command.callback.(func(string) error)(words[1])
 			if err != nil {
 				fmt.Println(err)
 			}
-
-		} else {
+		default:
 			err := command.callback.(func() error)()
 			if err != nil {
 				fmt.Println(err)
@@ -82,6 +82,11 @@ func getCommands() map[string]cliCommand {
 			name:        "explore",
 			description: "Displays pokemon in a given area",
 			callback:    commandExplore,
+		},
+		"catch": {
+			name:        "catch",
+			description: "Catches a pokemon",
+			callback:    commandCatch,
 		},
 	}
 }
